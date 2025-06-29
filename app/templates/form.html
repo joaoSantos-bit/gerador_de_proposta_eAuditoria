@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Propostas - e-Auditoria</title>
+    <link rel="icon" href="/app/e_auditoria_logo.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        color_1: 'rgb(32,159,254)', // azul
+                        color_1_hover: 'rgb(32, 136, 254)', // azul mais escuro
+                        color_2: 'rgb(87,242,170)', // verde
+                        color_3: 'rgb(0,93,166)', // verde azulado
+                        primary: '#0f0f17' // preto
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex flex-col bg-gray-100 min-h-screen">
+    <nav class="bg-primary text-white p-4">
+        <div class="container mx-auto flex justify-between">
+            <h1 class="text-2xl font-bold"><a href="/">e-Auditoria - Gerador de Propostas</a></h1>
+            <h2 class="text-2xl font-bold"><a href="/">Início</a></h2>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-200 p-4 mt-8">
+        <div class="container mx-auto text-center text-gray-600">
+            &copy; 2025 e-Auditoria. Todos os direitos reservados.
+        </div>
+    </footer>
+</body>
+</html> 

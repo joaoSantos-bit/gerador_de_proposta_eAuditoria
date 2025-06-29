@@ -1,0 +1,289 @@
+{% extends "form.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold text-primary mb-6 text-center">Upgrade COM arquivo</h2>
+    <form id="proposal-form" method="POST" action="/generate" class="space-y-6" enctype="multipart/form-data"
+        onsubmit="return montarPayload()">
+        <input type="hidden" name="form_id" value="3"> <!-- Ajuste o form_id conforme o template -->
+        <input type="hidden" name="variables" id="variables-input">
+
+        <div>
+            <label for="nome" class="block text-gray-700 font-semibold mb-2">Nome fantasia do cliente *</label>
+            <input type="text" id="nome" name="nome" placeholder="Informe o nome fantasia do cliente" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="cnpj" class="block text-gray-700 font-semibold mb-2">CNPJ do cliente *</label>
+            <input type="text" id="cnpj" name="cnpj" placeholder="Informe o nome fantasia do cliente" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="competen" class="block text-gray-700 font-semibold mb-2">Mês que arquivo foi analisado *</label>
+            <input type="month" id="competen" name="competen" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="enviou" class="block text-gray-700 font-semibold mb-2">Responsável pelo envio do arquivo *</label>
+            <input type="text" id="enviou" name="enviou" placeholder="Informe o responsável pelo envio do arquivo" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="dataenvio" class="block text-gray-700 font-semibold mb-2">Data do envio do arquivo pelo cliente *</label>
+            <input type="date" id="dataenvio" name="dataenvio" placeholder="Digite o nome fantasia do cliente" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="erros" class="block text-gray-700 font-semibold mb-2">Quantidade de erros do Logs Automático *</label>
+            <input type="number" id="erros" name="erros" placeholder="0" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="multa" class="block text-gray-700 font-semibold mb-2">Valor da multa do E-auditor ($) *</label>
+            <input type="text" id="multa" name="multa" placeholder="0" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+        <div>
+            <label for="incons" class="block text-gray-700 font-semibold mb-2">Quantidade de inconsistências do E-auditor *</label>
+            <input type="text" id="incons" name="incons" placeholder="0" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+        </div>
+<div>
+            <label for="planoold" class="block text-gray-700 font-semibold mb-2">Plano antigo *</label>
+            <select id="planoold" name="planoold"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="essencial">Essencial</option>
+                <option value="plus">Plus</option>
+                <option value="master">Master</option>
+                <option value="oportunidade">Oportunidade</option>
+                <option value="migracao">Migração</option>
+            </select>
+        </div>
+        <div>
+            <label for="valorsemdescold" class="block text-gray-700 font-semibold mb-2">Valor Mensalidade antiga sem
+                Desconto (R$) *</label>
+            <input type="text" id="valorsemdescold" name="valorsemdescold" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="plano" class="block text-gray-700 font-semibold mb-2">Plano *</label>
+            <select id="plano" name="plano"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="essencial">Essencial</option>
+                <option value="plus">Plus</option>
+                <option value="master">Master</option>
+                <option value="oportunidade">Oportunidade</option>
+                <option value="migracao">Migração</option>
+            </select>
+        </div>
+        <div>
+            <label for="valorsemdesc" class="block text-gray-700 font-semibold mb-2">Valor Mensalidade sem
+                Desconto (R$) *</label>
+            <input type="text" id="valorsemdesc" name="valorsemdesc" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="fidelidade" class="block text-gray-700 font-semibold mb-2">Fidelidade *</label>
+            <select id="fidelidade" name="fidelidade"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="3 meses">3 meses</option>
+                <option value="6 meses">6 meses</option>
+                <option value="12 meses">12 meses</option>
+                <option value="18 meses">18 meses</option>
+                <option value="24 meses">24 meses</option>
+            </select>
+        </div>
+        <div>
+            <label for="valorimplant" class="block text-gray-700 font-semibold mb-2">Valor da implantação (R$)
+                *</label>
+            <input type="text" id="valorimplant" name="valorimplant" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="parcimp" class="block text-gray-700 font-semibold mb-2">Parcelamento da
+                implantação *</label>
+            <select id="parcimp" name="parcimp"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="Uma única vez" selected>Uma única vez</option>
+                <option value="2 vezes">2 vezes</option>
+                <option value="3 vezes">3 vezes</option>
+            </select>
+        </div>
+        <div>
+            <div class="space-y-2">
+                <label for="down1" class="block text-gray-700 font-semibold mb-2">Log de correções realizadas *</label>
+                <input id="down1" name="down1" required type="file" class="block w-full text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary">
+                
+                <label for="down2" class="block text-gray-700 font-semibold mb-2">Laudo de auditoria por IA *</label>
+                <input id="down2" name="down2" required type="file" class="block w-full text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary">
+                
+                <label for="down3" class="block text-gray-700 font-semibold mb-2">Relatório de inconsistência *</label>
+                <input  id="down3" name="down3"required type="file" class="block w-full text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary">
+                
+                <label  for="down4" class="block text-gray-700 font-semibold mb-2">Link do SPED corrigido *</label>
+                <input  id="down4" name="down4"required type="file" class="block w-full text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary">
+                
+                <label  for="down5" class="block text-gray-700 font-semibold mb-2">Link do SPED original *</label>
+                <input  id="down5" name="down5"required type="file" class="block w-full text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary">
+            </div>
+        </div>
+        <button type="submit" id="generate-btn"
+            class="w-full mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors font-semibold">Enviar</button>
+    </form>
+</div>
+<div id="toast"
+    class="fixed top-4 right-4 bg-green-500 text-white px-10 py-5 rounded shadow-lg hidden transition-all duration-300 z-50">
+    Arquivo gerado com sucesso!
+</div>
+<script src="https://unpkg.com/imask"></script>
+<script>
+    
+    function formatarData(data) {
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        return dataFormatada;
+    }
+
+    function formatarDataMesEAno(data) {
+        let mes, ano;
+
+        if (typeof data === "string") {
+            if (data.includes("-")) {
+                [ano, mes] = data.split("-");
+            } else if (data.includes("/")) {
+                [mes, ano] = data.split("/");
+            }
+        } else if (data instanceof Date) {
+            mes = String(data.getMonth() + 1).padStart(2, '0');
+            ano = String(data.getFullYear());
+        } else {
+            return "";
+        }
+
+        // Garante que mês tenha 2 dígitos e ano tenha 4
+        mes = mes.padStart(2, "0");
+        ano = ano.padStart(4, "0");
+
+        return `${mes}/${ano}`;
+    }
+
+    function montarPayload() {
+        const vars = {
+            nome: document.getElementById('nome').value,
+            planoold: document.getElementById('planoold').value,
+            plano: document.getElementById('plano').value,
+            valorsemdescold: document.getElementById('valorsemdescold').value,
+            valorsemdesc: document.getElementById('valorsemdesc').value,
+            fidelidade: document.getElementById('fidelidade').value,
+            valorimplant: document.getElementById('valorimplant').value,
+            parcimp: document.getElementById('parcimp').value,
+            hoje: formatarData(new Date()),
+            cnpj: document.getElementById('cnpj').value,
+            competen: formatarDataMesEAno(new Date(document.getElementById('competen').value)),
+            enviou: document.getElementById('enviou').value,
+            dataenvio: formatarData(new Date(document.getElementById('dataenvio').value)),
+            erros: document.getElementById('erros').value,
+            multa: document.getElementById('multa').value,
+            incons: document.getElementById('incons').value,
+        };
+        
+        document.getElementById('variables-input').value = JSON.stringify(vars);
+        return true;
+    }
+
+    function showToast(message, duration = 5000) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.remove("hidden");
+        toast.classList.add("opacity-100");
+
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("opacity-100");
+        }, duration);
+    }
+
+    const buildMaskOptios = mask => {
+        return {
+            mask: `${mask} num`,
+            lazy: false,
+            blocks: {
+                num: {
+                    mask: Number,
+                    thousandsSeparator: '.',
+                    radix: ',',
+                    mapToRadix: ['.'],
+                    scale: 2,
+                    signed: false,
+                    padFractionalZeros: true
+                }
+            }
+        }
+    };
+
+    // Formata os campos de valor monetário
+    IMask(document.getElementById('valorimplant'), buildMaskOptios('R$'));
+    IMask(document.getElementById('valorsemdesc'), buildMaskOptios('R$'));
+    IMask(document.getElementById('valorsemdescold'), buildMaskOptios('R$'));
+    IMask(document.getElementById('multa'), buildMaskOptios('$'));
+
+    // Envia o formulário e trata o loding do botão ao enviar o formulário
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("proposal-form");
+        const button = document.getElementById("generate-btn");
+
+        if (!form || !button) return;
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            montarPayload();
+
+            // Alterar cor e estado do botão
+            button.disabled = true;
+            button.innerText = "Gerando...";
+            button.classList.remove("bg-color_1", "hover:bg-color_1_hover");
+            button.classList.add("bg-gray-400", "cursor-not-allowed");
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao gerar proposta.");
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "proposal_package.zip";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                showToast("arquivo .zip baixado com sucesso!");
+            } catch (err) {
+                showToast('Ocorreu um erro ao tentar gerar o arquivo .zip')
+            } finally {
+                // Restaurar botão
+                button.disabled = false;
+                button.innerText = "Enviar";
+                button.classList.remove("bg-gray-400", "cursor-not-allowed");
+                button.classList.add("bg-color_1", "hover:bg-color_1_hover");
+            }
+        });
+    });
+</script>
+
+{% endblock %}

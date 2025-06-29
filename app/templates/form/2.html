@@ -1,0 +1,201 @@
+{% extends "form.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold text-primary mb-6 text-center">Nova venda SEM arquivo</h2>
+    <form id="proposal-form" method="POST" action="/generate" class="space-y-6" enctype="multipart/form-data"
+        onsubmit="return montarPayload()">
+        <input type="hidden" name="form_id" value="2"> <!-- Ajuste o form_id conforme o template -->
+        <input type="hidden" name="variables" id="variables-input">
+
+        <div>
+            <label for="nome" class="block text-gray-700 font-semibold mb-2">Nome fantasia do cliente *</label>
+            <input type="text" id="nome" name="nome" placeholder="Digite o nome fantasia do cliente"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="plano" class="block text-gray-700 font-semibold mb-2">Plano *</label>
+            <select id="plano" name="plano"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="essencial">Essencial</option>
+                <option value="plus">Plus</option>
+                <option value="master">Master</option>
+                <option value="oportunidade">Oportunidade</option>
+                <option value="migracao">Migração</option>
+            </select>
+        </div>
+        <div>
+            <label for="valorsemdesc" class="block text-gray-700 font-semibold mb-2">Valor Mensalidade sem
+                Desconto (R$) *</label>
+            <input type="text" id="valorsemdesc" name="valorsemdesc" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="valorcomdesc" class="block text-gray-700 font-semibold mb-2">Valor Mensalidade com
+                Desconto (R$) *</label>
+            <input type="text" id="valorcomdesc" name="valorcomdesc" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="fidelidade" class="block text-gray-700 font-semibold mb-2">Fidelidade *</label>
+            <select id="fidelidade" name="fidelidade"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="3 meses">3 meses</option>
+                <option value="6 meses">6 meses</option>
+                <option value="12 meses">12 meses</option>
+                <option value="18 meses">18 meses</option>
+                <option value="24 meses">24 meses</option>
+            </select>
+        </div>
+        <div>
+            <label for="valorimplant" class="block text-gray-700 font-semibold mb-2">Valor da implantação (R$)
+                *</label>
+            <input type="text" id="valorimplant" name="valorimplant" placeholder="R$ 0,00"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+        </div>
+        <div>
+            <label for="parcimp" class="block text-gray-700 font-semibold mb-2">Parcelamento da
+                implantação *</label>
+            <select id="parcimp" name="parcimp"
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="Uma única vez" selected>Uma única vez</option>
+                <option value="2 vezes">2 vezes</option>
+                <option value="3 vezes">3 vezes</option>
+            </select>
+        </div>
+        <button type="submit" id="generate-btn"
+            class="w-full mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors font-semibold">Enviar</button>
+    </form>
+</div>
+<div id="toast"
+    class="fixed top-4 right-4 bg-green-500 text-white px-10 py-5 rounded shadow-lg hidden transition-all duration-300 z-50">
+    Arquivo gerado com sucesso!
+</div>
+<script src="https://unpkg.com/imask"></script>
+<script>
+    
+    function formatarDataHoje() {
+        const data = new Date();
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        return dataFormatada;
+    }
+
+    function montarPayload() {
+        const vars = {
+            nome: document.getElementById('nome').value,
+            plano: document.getElementById('plano').value,
+            valorsemdesc: document.getElementById('valorsemdesc').value,
+            valorcomdesc: document.getElementById('valorcomdesc').value,
+            fidelidade: document.getElementById('fidelidade').value,
+            valorimplant: document.getElementById('valorimplant').value,
+            parcimp: document.getElementById('parcimp').value,
+            hoje: formatarDataHoje()
+        };
+        
+        document.getElementById('variables-input').value = JSON.stringify(vars);
+        return true;
+    }
+
+    function showToast(message, duration = 5000) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.remove("hidden");
+        toast.classList.add("opacity-100");
+
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("opacity-100");
+        }, duration);
+    }
+
+    var maskOptions = {
+        mask: 'R$ num',
+        lazy: false,
+        blocks: {
+            num: {
+                mask: Number,
+                thousandsSeparator: '.',
+                radix: ',',
+                mapToRadix: ['.'],
+                scale: 2,
+                signed: false,
+                padFractionalZeros: true
+            }
+        }
+    };
+
+    // Formata os campos com máscara de Real
+
+
+    IMask(document.getElementById('valorimplant'), maskOptions);
+    IMask(document.getElementById('valorsemdesc'), maskOptions);
+    IMask(document.getElementById('valorcomdesc'), maskOptions);
+
+    // Envia o formulário e trata o loding do botão ao enviar o formulário
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("proposal-form");
+        const button = document.getElementById("generate-btn");
+
+        if (!form || !button) return;
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            montarPayload();
+
+            // Alterar cor e estado do botão
+            button.disabled = true;
+            button.innerText = "Gerando...";
+            button.classList.remove("bg-color_1", "hover:bg-color_1_hover");
+            button.classList.add("bg-gray-400", "cursor-not-allowed");
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao gerar proposta.");
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "proposal_package.zip";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                showToast("arquivo .zip baixado com sucesso!");
+            } catch (err) {
+                showToast('Ocorreu um erro ao tentar gerar o arquivo .zip')
+            } finally {
+                // Restaurar botão
+                button.disabled = false;
+                button.innerText = "Enviar";
+                button.classList.remove("bg-gray-400", "cursor-not-allowed");
+                button.classList.add("bg-color_1", "hover:bg-color_1_hover");
+            }
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "form.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Selecione o tipo de proposta</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Nova Venda COM Arquivo -->
+        <a href="/form/1" class="flex flex-col justify-between p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow h-[200px]">
+            <div>
+                <h3 class="text-xl font-semibold text-primary mb-2">Nova Venda COM Arquivo</h3>
+                <p class="text-gray-600">Gerar proposta para nova venda com arquivos anexos</p>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors w-full">
+                Gerar nova venda COM arquivo
+            </button>
+        </a>
+        <!-- Nova Venda SEM Arquivo -->
+        <a href="/form/2" class="flex flex-col justify-between p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow h-[200px]">
+            <div>
+                <h3 class="text-xl font-semibold text-primary mb-2">Nova Venda SEM Arquivo</h3>
+                <p class="text-gray-600">Gerar proposta para nova venda sem arquivos anexos</p>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors w-full">
+                Gerar nova venda SEM arquivo
+            </button>
+        </a>
+
+        <!-- Upgrade COM Arquivo -->
+        <a href="/form/3" class="flex flex-col justify-between p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow h-[200px]">
+            <div>
+                <h3 class="text-xl font-semibold text-primary mb-2">Upgrade COM Arquivo</h3>
+                <p class="text-gray-600">Gerar proposta de upgrade com arquivos anexos</p>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors w-full">
+                Gerar Upgrade COM arquivo
+            </button>
+        </a>
+
+        <!-- Upgrade SEM Arquivo -->
+        <a href="/form/4" class="flex flex-col justify-between p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow h-[200px]">
+            <div>
+                <h3 class="text-xl font-semibold text-primary mb-2">Upgrade SEM Arquivo</h3>
+                <p class="text-gray-600">Gerar proposta de upgrade sem arquivos anexos</p>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-color_1 text-white rounded hover:bg-color_1_hover transition-colors w-full">
+                Gerar Upgrade SEM arquivo
+            </button>
+        </a>
+    </div>
+</div>
+{% endblock %}
