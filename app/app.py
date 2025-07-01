@@ -81,6 +81,7 @@ async def generate_proposal(
     
     # Create ZIP with all files
     zip_path = pptx_generator.create_zip(pptx_path, pdf_path, email_path)
+    # zip_path = pptx_generator.create_zip(pptx_path)
     
     return FileResponse(
         zip_path,

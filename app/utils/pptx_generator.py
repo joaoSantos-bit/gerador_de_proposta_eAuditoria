@@ -113,10 +113,23 @@ class PPTXGenerator:
         def substituir_placeholders(texto: str, dados: dict) -> str:
             encontrados = set(re.findall(r"\{\{(\w+)\}\}", texto))
             placeholders_slide.update(encontrados)
+
             for chave in encontrados:
                 if chave not in dados:
                     print(f"⚠️  Placeholder '{{{{{chave}}}}}' está no slide mas NÃO foi encontrado em self.variables.")
-            return re.sub(r"\{\{(\w+)\}\}", lambda m: str(dados.get(m.group(1), m.group(0))), texto)
+
+            resultado = re.sub(r"\{\{(\w+)\}\}", lambda m: str(dados.get(m.group(1), m.group(0))), texto)
+
+            # Correções específicas
+            substituicoes_personalizadas = {
+                "migracao": "migração"
+                # adicione outras se necessário
+            }
+
+            for incorreto, correto in substituicoes_personalizadas.items():
+                resultado = resultado.replace(incorreto, correto)
+
+            return resultado
 
         def processar_text_frame(text_frame):
             if text_frame is None:
@@ -148,12 +161,19 @@ class PPTXGenerator:
 
                 if is_descplan or is_dimensionamento or is_descplanold or is_dimensionamentoold:
                     paragrafo.clear()
-                    lista = self.variables["descplan"] if is_descplan else self.variables["dimensionamento"]
+                    if is_descplan:
+                        lista = self.variables["descplan"]
+                    elif is_dimensionamento:
+                        lista = self.variables["dimensionamento"]
+                    elif is_descplanold:
+                        lista = self.variables["descplanold"]
+                    elif is_dimensionamentoold:
+                        lista = self.variables["dimensionamentoold"]
 
                     for item in lista:
                         p = text_frame.add_paragraph()
                         r = p.add_run()
-                        r.text = item
+                        r.text = u"\u00A0\u00A0" + item
                         p.level = 0
                         if estilo_base:
                             r.font.size = estilo_base["size"]
@@ -163,9 +183,10 @@ class PPTXGenerator:
                             r.font.color.rgb = RGBColor(255, 255, 255)
                         p._element.set("lvl", "0")
                         p._pPr.insert(0, parse_xml(
-                            '<a:buChar xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" char="○"/>'
+                            '<a:buChar xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" char="◦"/>'
                         ))
-                        p.bullet_indent = Pt(9)
+                        p.bullet_indent = Pt(9)     # Bullet alinhado
+                        p.margin_left = Pt(18)      # Texto mais afastado do bullet
                 else:
                     texto_original = ''.join(run.text for run in paragrafo.runs)
                     novo_texto = substituir_placeholders(texto_original, self.variables)
@@ -217,10 +238,10 @@ class PPTXGenerator:
                 print("❌ ERRO: As seguintes variáveis estão ausentes em self.variables:")
                 for chave in faltando:
                     print(f" - {{{{{chave}}}}}")
-                print("\n📌 Verifique se os nomes estão corretos e se foram definidos no dicionário.")
+                # print("\n📌 Verifique se os nomes estão corretos e se foram definidos no dicionário.")
 
-        print("\n🔍 Placeholders encontrados no slide:", placeholders_slide)
-        print("📦 Chaves disponíveis em self.variables:", set(self.variables.keys()))
+        # print("\n🔍 Placeholders encontrados no slide:", placeholders_slide)
+        # print("📦 Chaves disponíveis em self.variables:", set(self.variables.keys()))
         validar_variaveis(placeholders_slide, self.variables)
 
 
@@ -261,8 +282,6 @@ class PPTXGenerator:
             # Substitui o valor da variável (ex: down1, down2...) pelo link do Drive
             self.variables[key] = link
 
-
-    # TODO Ajustar isso aqui depois, se sobrar tempo (Ele realmente vai querer que eu gere um arquivo de txt para os vendedores dele enviar por e-mail?)
     def generate_email_template(self) -> Path:
         email_template = f"""
             Prezado(a) {self.variables.get('nome', '[Nome do Cliente]')},
@@ -295,3 +314,16 @@ class PPTXGenerator:
                     if file_path.exists():
                         zip_file.write(file_path, f"anexos/{file.filename}")
         return zip_path
+    # def create_zip(self, pptx_path: Path) -> Path:
+    #     zip_path = self.temp_dir / "proposal_package.zip"
+    #     with zipfile.ZipFile(zip_path, 'w') as zip_file:
+    #         zip_file.write(pptx_path, "proposta.pptx")
+
+    #         if self.files:
+    #             for file in self.files.values():
+    #                 if file is None:
+    #                     continue
+    #                 file_path = self.temp_dir / file.filename
+    #                 if file_path.exists():
+    #                     zip_file.write(file_path, f"anexos/{file.filename}")
+    #     return zip_path
