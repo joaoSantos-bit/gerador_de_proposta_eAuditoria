@@ -3,11 +3,9 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-import os
 from dotenv import load_dotenv
 from typing import List, Optional
 from .utils.pptx_generator import PPTXGenerator
-# from .utils.pdf_converter import convert_to_pdf
 from app.utils.cloud_convert_service import convert_to_pdf
 import json
 from pathlib import Path
@@ -22,9 +20,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Templates configuration
 templates = Jinja2Templates(directory="app/templates")
-
-# Constants
-UPLOAD_LIMIT = int(os.getenv("UPLOAD_LIMIT", 5 * 1024 * 1024))  # 5MB default
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -73,7 +68,6 @@ async def generate_proposal(
     pptx_path = await pptx_generator.generate()
     
     # Convert to PDF
-    # pdf_path = await convert_to_pdf(pptx_path)
     pdf_path = await convert_to_pdf(pptx_path, pptx_path.with_suffix(".pdf"))
     
     # Generate email template
@@ -81,7 +75,6 @@ async def generate_proposal(
     
     # Create ZIP with all files
     zip_path = pptx_generator.create_zip(pptx_path, pdf_path, email_path)
-    # zip_path = pptx_generator.create_zip(pptx_path)
     
     return FileResponse(
         zip_path,

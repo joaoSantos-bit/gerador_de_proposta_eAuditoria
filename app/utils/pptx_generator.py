@@ -1,8 +1,9 @@
+from io import StringIO
 from pptx import Presentation
 from pathlib import Path
 import os
 import zipfile
-from typing import List, Optional
+from typing import Dict, List, Optional
 from fastapi import UploadFile
 import tempfile
 import shutil
@@ -11,6 +12,8 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from app.utils.drive_uploader import upload_file_to_drive
 import re
+import requests
+import csv
 
 class PPTXGenerator:
     def __init__(self, variables: dict, form_id: int, files: Optional[dict] = None):
@@ -31,70 +34,46 @@ class PPTXGenerator:
                 "dimensionamentoold": features.get("dimensionamento")
             }
             self.variables.update(planoolddetalhes)
-            
+
+    # TODO Ajustar para ficar mais rápido. Quando eu tiver que buscar mais de uma informação, então eu devo retornar tudo em uma única consulta, para evitar gargalos.       
     @staticmethod
-    def get_features_by_plan(plano: str) -> dict:
-        if plano == "essencial":
-            return {
-                "descplan": [
-                    "Correção automática do SPED",
-                    "Exportação de SPED para Excel",
-                    "Auditoria Digital de obrigações acessórias",
-                    "Inteligência artificial para resultados de auditoria"
-                ],
-                "dimensionamento": [
-                    "1 usuário",
-                    "2 GB de espaço",
-                    "Robôs de captura de documentos: 10 CNPJ's (presente/futuro)",
-                    "Busca de NF-e e CT-e de terceiros (300 documentos/mês)",
-                    "Exportação para Excel (500 MB/mês)",
-                    "Inteligência Artificial (250 consultas/mês)"
-                ]
+    def get_features_by_plan(plano: str) -> Dict[str, list]:
+            sheet_id = os.getenv("SHEET_ID")
+            sheet_name = os.getenv("SHEET_NAME", "Planos")
+            url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+
+            response = requests.get(url)
+            response.raise_for_status()
+
+            # Ler o CSV
+            descplan = []
+            dimensionamento = []
+
+            reader = csv.DictReader(StringIO(response.text))
+
+            # TODO O problema está no for que classifica os dados
+            for row in reader:
+                plano_csv = row.get("plano", "").strip().lower()
+                if plano_csv != plano.lower():
+                    continue
+
+                # Preencher descplan e dimensionamento (ambos são opcionais)
+                if row.get("descplan"):
+                    desc = row["descplan"].strip()
+                    if desc != "-":
+                        descplan.append(desc)
+                if row.get("dimensionamento"):
+                    dimen = row["dimensionamento"].strip()
+                    if dimen != "-":
+                        dimensionamento.append(dimen)
+
+            dic = {
+                "descplan": descplan,
+                "dimensionamento": dimensionamento
             }
-        elif plano == "Plus":
-            return {
-                "descplan": ["A", "B", "C", "D", "E", "F"],
-                "dimensionamento": ["X", "Y", "Z", "H", "W"]
-            }
-        elif plano == "master":
-            return {
-                "descplan": [
-                    "Correção automática do SPED",
-                    "Exportação de SPED para Excel",
-                    "Auditoria Digital de obrigações acessórias",
-                    "Inteligência artificial para resultados de auditoria",
-                    "Consulta de tributação por NCM",
-                    "Módulos de Recuperação Tributária"
-                ],
-                "dimensionamento": [
-                    "1 usuário",
-                    "2 GB de espaço",
-                    "Robôs de captura de documentos: 20 CNPJ's (presente/futuro)",
-                    "Busca de NF-e e CT-e de terceiros (500 documentos/mês)",
-                    "Exportação para Excel (2.500 MB/mês)",
-                    "Inteligência Artificial (1.000 consultas/mês)"
-                ]
-            }
-        elif plano in ["oportunidade", "migracao"]:
-            return {
-                "descplan": [
-                    "Correção automática do SPED",
-                    "Exportação de SPED para Excel",
-                    "Auditoria Digital de obrigações acessórias",
-                    "Inteligência artificial para resultados de auditoria",
-                    "Consulta de tributação por NCM",
-                    "Módulos de Recuperação Tributária"
-                ],
-                "dimensionamento": [
-                    "1 usuário",
-                    "2 GB de espaço",
-                    "Robôs de captura de documentos: 10 CNPJ's (presente/futuro)",
-                    "Busca de NF-e e CT-e de terceiros (300 documentos/mês)",
-                    "Exportação para Excel (500 MB/mês)",
-                    "Inteligência Artificial (250 consultas/mês)"
-                ]
-            }
-        return {}
+
+            print(dic)
+            return dic
 
     async def generate(self) -> Path:
         print(self.form_id)
@@ -314,16 +293,3 @@ class PPTXGenerator:
                     if file_path.exists():
                         zip_file.write(file_path, f"anexos/{file.filename}")
         return zip_path
-    # def create_zip(self, pptx_path: Path) -> Path:
-    #     zip_path = self.temp_dir / "proposal_package.zip"
-    #     with zipfile.ZipFile(zip_path, 'w') as zip_file:
-    #         zip_file.write(pptx_path, "proposta.pptx")
-
-    #         if self.files:
-    #             for file in self.files.values():
-    #                 if file is None:
-    #                     continue
-    #                 file_path = self.temp_dir / file.filename
-    #                 if file_path.exists():
-    #                     zip_file.write(file_path, f"anexos/{file.filename}")
-    #     return zip_path
