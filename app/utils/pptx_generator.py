@@ -3,17 +3,16 @@ from pptx import Presentation
 from pathlib import Path
 import os
 import zipfile
-from typing import Dict, List, Optional
-from fastapi import UploadFile
+from typing import Dict, Optional
 import tempfile
-import shutil
 from pptx.oxml import parse_xml
-from pptx.util import Inches, Pt
+from pptx.util import Pt
 from pptx.dml.color import RGBColor
-from app.utils.drive_uploader import upload_file_to_drive
+from app.utils.drive_uploader import upload_file_to_drive, download_file_from_drive  
 import re
 import requests
 import csv
+from app.utils.generate_email_templates import generate_email_template
 
 class PPTXGenerator:
     def __init__(self, variables: dict, form_id: int, files: Optional[dict] = None):
@@ -77,13 +76,24 @@ class PPTXGenerator:
 
     async def generate(self) -> Path:
         print(self.form_id)
-        template_path = Path(f"app/templates/pptx/{self.form_id}.pptx")
+        
+        # Baixa o template do Drive
+        template_drive_filename = f"{self.form_id}.pptx"
+        template_path_str = await download_file_from_drive(template_drive_filename)
+        template_path = Path(template_path_str)
+
+        # Abre a apresentação
         prs = Presentation(template_path)
+        
+        # Manipula os dados
         if self.files:
             await self._handle_file_uploads(prs)
         self._replace_text_variables(prs)
-        output_path = self.temp_dir / "proposal.pptx"
+
+        # Salva a apresentação final
+        output_path = self.temp_dir / "Proposta e-Auditoria.pptx"
         prs.save(str(output_path))
+
         return output_path
 
     def _replace_text_variables(self, prs: Presentation):
@@ -217,13 +227,8 @@ class PPTXGenerator:
                 print("❌ ERRO: As seguintes variáveis estão ausentes em self.variables:")
                 for chave in faltando:
                     print(f" - {{{{{chave}}}}}")
-                # print("\n📌 Verifique se os nomes estão corretos e se foram definidos no dicionário.")
 
-        # print("\n🔍 Placeholders encontrados no slide:", placeholders_slide)
-        # print("📦 Chaves disponíveis em self.variables:", set(self.variables.keys()))
         validar_variaveis(placeholders_slide, self.variables)
-
-
 
         def processar_tabela(tabela):
             for linha in tabela.rows:
@@ -262,29 +267,18 @@ class PPTXGenerator:
             self.variables[key] = link
 
     def generate_email_template(self) -> Path:
-        email_template = f"""
-            Prezado(a) {self.variables.get('nome', '[Nome do Cliente]')},
-
-            Segue em anexo nossa proposta comercial conforme solicitado.
-
-            Valor total: R$ {self.variables.get('valorcomdesc', '[Valor]')}
-            {f"Valor com desconto: R$ {self.variables.get('valorsemdesc')}" if self.variables.get('valorsemdesc') != self.variables.get('valorcomdesc') else ''}
-
-            Ficamos à disposição para esclarecimentos.
-
-            Atenciosamente,
-            Equipe e-Auditoria
-        """
+        email_template = generate_email_template(self.form_id, self.variables)
         email_path = self.temp_dir / "email_template.txt"
         email_path.write_text(email_template)
+        
         return email_path
 
     def create_zip(self, pptx_path: Path, pdf_path: Path, email_path: Path) -> Path:
-        zip_path = self.temp_dir / "proposal_package.zip"
+        zip_path = self.temp_dir / "proposta e-Auditoria.zip"
         with zipfile.ZipFile(zip_path, 'w') as zip_file:
-            zip_file.write(pptx_path, "proposta.pptx")
-            zip_file.write(pdf_path, "proposta.pdf")
-            zip_file.write(email_path, "email.txt")
+            zip_file.write(pptx_path, "proposta e-Auditoria.pptx")
+            zip_file.write(pdf_path, "proposta e-Auditoria.pdf")
+            zip_file.write(email_path, "email proposta e-Auditoria.txt")
             if self.files:
                 for file in self.files.values():
                     if file is None:
