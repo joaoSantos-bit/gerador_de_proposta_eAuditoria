@@ -4,16 +4,25 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import os
 from pathlib import Path
 import io
+import base64
+
+credentials_b64 = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON_B64")
+credentials_json_path = "/tmp/credentials.json"
+
+if credentials_b64:
+    with open(credentials_json_path, "wb") as f:
+        f.write(base64.b64decode(credentials_b64))
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_json_path
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-CREDENTIALS_PATH = BASE_DIR / "credentials.json"
 
 creds = service_account.Credentials.from_service_account_file(
-    str(CREDENTIALS_PATH), scopes=SCOPES
-)
+    credentials_json_path, scopes=SCOPES
+).with_subject("dayvson@aplayer.com.br")
+
 drive_service = build("drive", "v3", credentials=creds)
 
 async def upload_file_to_drive(file_path: str, file_name: str) -> str:
