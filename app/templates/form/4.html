@@ -105,9 +105,11 @@
         </div>
         <div>
             <label for="observacoes" class="block text-gray-700 font-semibold mb-2">Observações</label>
-            <textarea rows="5" maxlength="150" id="observacoes" name="observacoes" placeholder="Escreva suas observações"
-                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
-            </textarea>
+        <div
+            id="observacoes"
+            contenteditable="true"
+            class="w-full h-32 border border-gray-300 rounded px-2 py-2 overflow-auto"
+        ></div>
             <span class="pt-2 text-gray-400">Limite máximo de caracteres: 150</span>
         </div>
         <button id="generate-btn" class="w-full bg-color_1 hover:bg-color_1_hover text-white py-2 px-4 rounded flex items-center justify-center gap-2">
@@ -125,6 +127,23 @@
 </div>
 <script src="https://unpkg.com/imask"></script>
 <script>
+    const observacoes = document.getElementById("observacoes");
+    const maxChars = 150;
+
+    observacoes.addEventListener("input", () => {
+        const text = observacoes.innerText;
+        if (text.length > maxChars) {
+        observacoes.innerText = text.substring(0, maxChars);
+        // Reposiciona o cursor no final
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(observacoes);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        }
+    });
+
     function toggleDesconto() {
         const checkbox = document.getElementById("aplicar-desconto");
         const campo = document.getElementById("campo-desconto");

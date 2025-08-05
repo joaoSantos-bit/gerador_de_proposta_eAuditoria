@@ -175,16 +175,16 @@
         </div>
         <div>
             <label for="observacoes" class="block text-gray-700 font-semibold mb-2">Observações</label>
-            <textarea rows="5" maxlength="150" id="observacoes" name="observacoes" placeholder="Escreva suas observações"
-                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
-            </textarea>
+        <div
+            id="observacoes"
+            contenteditable="true"
+            class="w-full h-32 border border-gray-300 rounded px-2 py-2 overflow-auto"
+        ></div>
             <span class="pt-2 text-gray-400">Limite máximo de caracteres: 150</span>
         </div>
-        <button id="generate-btn"
-            class="w-full bg-color_1 hover:bg-color_1_hover text-white py-2 px-4 rounded flex items-center justify-center gap-2">
+        <button id="generate-btn" class="w-full bg-color_1 hover:bg-color_1_hover text-white py-2 px-4 rounded flex items-center justify-center gap-2">
             <span id="button-text">Gerar arquivos</span>
-            <svg id="loading-spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24">
+            <svg id="loading-spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
@@ -197,12 +197,30 @@
 </div>
 <script src="https://unpkg.com/imask"></script>
 <script>
+    const observacoes = document.getElementById("observacoes");
+    const maxChars = 150;
+
+    observacoes.addEventListener("input", () => {
+        const text = observacoes.innerText;
+        if (text.length > maxChars) {
+        observacoes.innerText = text.substring(0, maxChars);
+        // Reposiciona o cursor no final
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(observacoes);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        }
+    });
+
     function toggleDesconto() {
         const checkbox = document.getElementById("aplicar-desconto");
         const campo = document.getElementById("campo-desconto");
 
         if (checkbox.checked) {
             campo.classList.remove("hidden");
+            IMask(document.getElementById('valorcomdesc'), buildMaskOptios('R$'));
         } else {
             campo.classList.add("hidden");
             document.getElementById("valorcomdesc").value = ""; // limpa o campo se desmarcar
@@ -358,7 +376,6 @@
     // Formata os campos de valor monetário
     IMask(document.getElementById('valorimplant'), buildMaskOptios('R$'));
     IMask(document.getElementById('valorsemdesc'), buildMaskOptios('R$'));
-    IMask(document.getElementById('valorcomdesc'), buildMaskOptios('R$'));
     IMask(document.getElementById('multa'), buildMaskOptios('$'));
 
     // Envia o formulário e trata o loding do botão ao enviar o formulário

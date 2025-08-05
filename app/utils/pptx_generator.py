@@ -163,6 +163,7 @@ class PPTXGenerator:
                                 run.font.bold = estilo_base["bold"]
                                 run.font.italic = estilo_base["italic"]
                                 run.font.name = estilo_base["name"]
+                                
                                 if estilo_base["color"]:
                                     run.font.color.rgb = estilo_base["color"]
 
@@ -178,16 +179,13 @@ class PPTXGenerator:
                                 paragrafo.clear()
                                 run = paragrafo.add_run()
                                 run.text = "◦" + u"\u00A0\u00A0" + texto
-                                paragrafo.level = 0
+
                                 if estilo_base:
                                     run.font.size = estilo_base["size"]
                                     run.font.bold = estilo_base["bold"]
                                     run.font.italic = estilo_base["italic"]
                                     run.font.name = estilo_base["name"]
                                     run.font.color.rgb = RGBColor(255, 255, 255)
-                                paragrafo._element.set("lvl", "0")
-                                paragrafo.bullet_indent = Pt(9)
-                                paragrafo.margin_left = Pt(18)
 
                     for index, item in enumerate(lista):
                         texto = item
@@ -198,18 +196,17 @@ class PPTXGenerator:
                         if (index > 0):
                             paragrafo = text_frame.add_paragraph()
 
+                        paragrafo.clear()
                         run = paragrafo.add_run()
                         run.text = "◦" + u"\u00A0\u00A0" + texto
-                        paragrafo.level = 0
+
                         if estilo_base:
                             run.font.size = estilo_base["size"]
                             run.font.bold = estilo_base["bold"]
                             run.font.italic = estilo_base["italic"]
                             run.font.name = estilo_base["name"]
                             run.font.color.rgb = RGBColor(255, 255, 255)
-                        paragrafo._element.set("lvl", "0")
-                        paragrafo.bullet_indent = Pt(9)     # Bullet alinhado
-                        paragrafo.margin_left = Pt(18)      # Texto mais afastado do bullet
+
                 else:
                     texto_original = ''.join(run.text for run in paragrafo.runs)
                     novo_texto = substituir_placeholders(texto_original, self.variables)
@@ -229,6 +226,7 @@ class PPTXGenerator:
                             run.font.bold = estilo_base["bold"]
                             run.font.italic = estilo_base["italic"]
                             run.font.name = estilo_base["name"]
+                            
                             if estilo_base["color"]:
                                 run.font.color.rgb = estilo_base["color"]
 
