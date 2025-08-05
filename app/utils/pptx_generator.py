@@ -50,7 +50,6 @@ class PPTXGenerator:
 
             reader = csv.DictReader(StringIO(response.text))
 
-            # TODO O problema está no for que classifica os dados
             for row in reader:
                 plano_csv = row.get("plano", "").strip().lower()
                 if plano_csv != plano.lower():
@@ -107,16 +106,7 @@ class PPTXGenerator:
                 if chave not in dados:
                     print(f"⚠️  Placeholder '{{{{{chave}}}}}' está no slide mas NÃO foi encontrado em self.variables.")
 
-            resultado = re.sub(r"\{\{(\w+)\}\}", lambda m: str(dados.get(m.group(1), m.group(0))), texto)
-
-            # Correções específicas
-            substituicoes_personalizadas = {
-                "migracao": "migração"
-                # adicione outras se necessário
-            }
-
-            for incorreto, correto in substituicoes_personalizadas.items():
-                resultado = resultado.replace(incorreto, correto)
+            resultado = re.sub(r"\{\{(\w+)\}\}", lambda m: str(dados.get(m.group(1), "")), texto)
 
             return resultado
 
@@ -147,8 +137,9 @@ class PPTXGenerator:
                 is_dimensionamento = "{{dimensionamento}}" in texto_original and isinstance(self.variables.get("dimensionamento"), list)
                 is_descplanold = "{{descplanold}}" in texto_original and isinstance(self.variables.get("descplanold"), list)
                 is_dimensionamentoold = "{{dimensionamentoold}}" in texto_original and isinstance(self.variables.get("dimensionamentoold"), list) 
+                is_adicionais = "{{aditivos}}" in texto_original and "aditivos" in self.variables
 
-                if is_descplan or is_dimensionamento or is_descplanold or is_dimensionamentoold:
+                if is_descplan or is_dimensionamento or is_descplanold or is_dimensionamentoold or is_adicionais:
                     paragrafo.clear()
                     if is_descplan:
                         lista = self.variables["descplan"]
@@ -158,24 +149,67 @@ class PPTXGenerator:
                         lista = self.variables["descplanold"]
                     elif is_dimensionamentoold:
                         lista = self.variables["dimensionamentoold"]
+                    elif is_adicionais:
+                        lista = self.variables.get("aditivos", [])
 
-                    for item in lista:
-                        p = text_frame.add_paragraph()
-                        r = p.add_run()
-                        r.text = u"\u00A0\u00A0" + item
-                        p.level = 0
+                        if not lista:
+                            texto_original = ''.join(run.text for run in paragrafo.runs)
+                            paragrafo.clear()
+                            run = paragrafo.add_run()
+                            run.text = "Sem aditivos"
+
+                            if estilo_base:
+                                run.font.size = estilo_base["size"]
+                                run.font.bold = estilo_base["bold"]
+                                run.font.italic = estilo_base["italic"]
+                                run.font.name = estilo_base["name"]
+                                if estilo_base["color"]:
+                                    run.font.color.rgb = estilo_base["color"]
+
+                        else:
+                            for index, item in enumerate(lista):
+                                nome = item.get("nome", "").strip()
+                                valor = str(item.get("valor", "")).strip()
+                                texto = f"{nome}: {valor}"
+
+                                if (index > 0):
+                                    paragrafo = text_frame.add_paragraph()
+
+                                paragrafo.clear()
+                                run = paragrafo.add_run()
+                                run.text = "◦" + u"\u00A0\u00A0" + texto
+                                paragrafo.level = 0
+                                if estilo_base:
+                                    run.font.size = estilo_base["size"]
+                                    run.font.bold = estilo_base["bold"]
+                                    run.font.italic = estilo_base["italic"]
+                                    run.font.name = estilo_base["name"]
+                                    run.font.color.rgb = RGBColor(255, 255, 255)
+                                paragrafo._element.set("lvl", "0")
+                                paragrafo.bullet_indent = Pt(9)
+                                paragrafo.margin_left = Pt(18)
+
+                    for index, item in enumerate(lista):
+                        texto = item
+                
+                        if is_adicionais:
+                            continue
+                        
+                        if (index > 0):
+                            paragrafo = text_frame.add_paragraph()
+
+                        run = paragrafo.add_run()
+                        run.text = "◦" + u"\u00A0\u00A0" + texto
+                        paragrafo.level = 0
                         if estilo_base:
-                            r.font.size = estilo_base["size"]
-                            r.font.bold = estilo_base["bold"]
-                            r.font.italic = estilo_base["italic"]
-                            r.font.name = estilo_base["name"]
-                            r.font.color.rgb = RGBColor(255, 255, 255)
-                        p._element.set("lvl", "0")
-                        p._pPr.insert(0, parse_xml(
-                            '<a:buChar xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" char="◦"/>'
-                        ))
-                        p.bullet_indent = Pt(9)     # Bullet alinhado
-                        p.margin_left = Pt(18)      # Texto mais afastado do bullet
+                            run.font.size = estilo_base["size"]
+                            run.font.bold = estilo_base["bold"]
+                            run.font.italic = estilo_base["italic"]
+                            run.font.name = estilo_base["name"]
+                            run.font.color.rgb = RGBColor(255, 255, 255)
+                        paragrafo._element.set("lvl", "0")
+                        paragrafo.bullet_indent = Pt(9)     # Bullet alinhado
+                        paragrafo.margin_left = Pt(18)      # Texto mais afastado do bullet
                 else:
                     texto_original = ''.join(run.text for run in paragrafo.runs)
                     novo_texto = substituir_placeholders(texto_original, self.variables)

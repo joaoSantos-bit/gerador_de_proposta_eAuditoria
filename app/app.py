@@ -23,41 +23,57 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Templates configuration
 templates = Jinja2Templates(directory="app/templates")
 
+VALID_FORMS = {1, 2, 3, 4}
+
+def get_csv_data(sheet_id: str, gid: str, as_dict: bool = False) -> dict | list:
+    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+    async def fetch():
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, follow_redirects=True)
+            if response.status_code == 200:
+                csv_content = response.text
+                csv_reader = csv.reader(StringIO(csv_content))
+                next(csv_reader)  # pular cabeçalho
+                if as_dict:
+                    return {row[0]: row[1] for row in csv_reader if row}
+                else:
+                    return [row[0] for row in csv_reader if row]
+            return {} if as_dict else []
+    return fetch()
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/form/{form_id}", response_class=HTMLResponse)
 async def form(request: Request, form_id: int):
-    if form_id not in [1, 2, 3, 4]:
+    if form_id not in VALID_FORMS:
         return templates.TemplateResponse("error.html", {
             "request": request,
             "message": "Formulário inválido"
         })
 
-    SHEET_ID = os.getenv("SHEET_ID")  # exemplo: '1AbCDeFGhIjKLmnopQrStUVwxyz1234567890'
-    GID = "655425745"  # ajuste conforme necessário
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
-    vendedores = []
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, follow_redirects=True)
+    SHEET_ID = os.getenv("SHEET_ID")
+    vendedores_gid = "655425745"
+    planos_gid = "0"
+    aditivos_gid = "15276032"
 
-        if response.status_code == 200:
-            csv_content = response.text
-            csv_reader = csv.reader(StringIO(csv_content))
-            next(csv_reader)  # pular cabeçalho
-            for row in csv_reader:
-                if row:
-                    vendedores.append(row[0])
+    vendedores = await get_csv_data(SHEET_ID, vendedores_gid, as_dict=False)
+    planos = await get_csv_data(SHEET_ID, planos_gid, as_dict=True)
+    aditivos = await get_csv_data(SHEET_ID, aditivos_gid, as_dict=True)
+
     return templates.TemplateResponse(
         f"form/{form_id}.html",
         {
             "request": request,
             "form_id": form_id,
-            "show_files": form_id in [1, 3],  # Forms 1 e 3 permitem arquivos
-            "vendedores": vendedores
+            "show_files": form_id in {1, 3},
+            "vendedores": vendedores,
+            "planos": planos,
+            "aditivos": aditivos
         }
     )
+
 
 @app.post("/generate")
 async def generate_proposal(

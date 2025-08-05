@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables
+*.env
+.env.*
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Compiled files
+*.so
+*.dll
+*.exe
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# PDF/PPTX/ZIP generated files
+*.pdf
+*.pptx
+*.zip
+
+# Coverage reports
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+coverage/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+
+# Pytest
+.pytest_cache/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Database
+*.sqlite3
+*.db
+
+# IDEs
+.idea/
+*.iml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Node (if applicable)
+node_modules/
