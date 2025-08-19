@@ -219,7 +219,10 @@
         return dataFormatada;
     }
 
-    const getDOMElement = element => document.getElementById(element).value;
+    const getDOMElement = element => {
+        const el = document.getElementById(element);
+        return el.hasAttribute("contenteditable") ? el.innerText : el.value;
+    };
 
     function montarPayload() {
         const vars = {
