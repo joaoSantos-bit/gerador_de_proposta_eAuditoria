@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 creds = service_account.Credentials.from_service_account_file(
     credentials_json_path, scopes=SCOPES
-).with_subject("dayvson@aplayer.com.br")
+).with_subject("sped@zerarpva.com")
 
 drive_service = build("drive", "v3", credentials=creds)
 
