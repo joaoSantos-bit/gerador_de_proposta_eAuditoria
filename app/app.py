@@ -54,9 +54,9 @@ async def form(request: Request, form_id: int):
         })
 
     SHEET_ID = os.getenv("SHEET_ID")
-    vendedores_gid = "655425745"
-    planos_gid = "0"
-    aditivos_gid = "15276032"
+    vendedores_gid = "1217366771"
+    planos_gid = "1286926500"
+    aditivos_gid = "2066662115"
 
     vendedores = await get_csv_data(SHEET_ID, vendedores_gid, as_dict=False)
     planos = await get_csv_data(SHEET_ID, planos_gid, as_dict=True)
